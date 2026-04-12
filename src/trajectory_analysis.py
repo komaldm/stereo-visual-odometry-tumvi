@@ -1,219 +1,140 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import os
 
 
-def load_tum_format(filename):
-    """Loads TUM trajectory and returns timestamps and Nx3 XYZ coordinates."""
+def load_tum(filename):
     data = np.loadtxt(filename)
-    timestamps = data[:, 0]
-    xyz = data[:, 1:4]
-    return timestamps, xyz
+    return data[:, 0], data[:, 1:4]
 
 
-def associate_timestamps_start_only(ts_est, xyz_est, ts_gt, xyz_gt, max_diff=0.05, max_frames=200):
-    """Matches estimated poses to ground truth poses for the first 200 frames to avoid scale drift breaking the alignment."""
-    matched_est = []
-    matched_gt = []
-
+def associate(ts_est, xyz_est, ts_gt, xyz_gt, max_diff=0.05):
+    matched_est, matched_gt = [], []
     for i, t_est in enumerate(ts_est):
         diffs = np.abs(ts_gt - t_est)
-        best_idx = np.argmin(diffs)
-
-        if diffs[best_idx] < max_diff:
+        idx = np.argmin(diffs)
+        if diffs[idx] < max_diff:
             matched_est.append(xyz_est[i])
-            matched_gt.append(xyz_gt[best_idx])
-
-        if len(matched_est) >= max_frames:
-            break
-
+            matched_gt.append(xyz_gt[idx])
     return np.array(matched_est).T, np.array(matched_gt).T
 
 
-def get_sim3(model, data):
-    """Computes Scale, Rotation, and Translation to align data to model."""
-    mu_M = model.mean(1, keepdims=True)
+def align_sim3(model, data):
+    mu_M = model.mean(1, keepdims=True);
     mu_D = data.mean(1, keepdims=True)
-    model_zero = model - mu_M
+    model_zero = model - mu_M;
     data_zero = data - mu_D
-
-    Sigma_px = (data_zero @ model_zero.T) / data.shape[1]
-    U, D, V_T = np.linalg.svd(Sigma_px)
-
-    S = np.eye(3)
-    if np.linalg.det(U) * np.linalg.det(V_T) < 0:
-        S[2, 2] = -1
-
-    R = V_T.T @ S @ U.T
-    sigma_p2 = np.mean(np.sum(data_zero ** 2, axis=0))
-    scale = (1.0 / sigma_p2) * np.trace(np.diag(D) @ S)
-    t = mu_M - scale * R @ mu_D
-
-    return scale, R, t
+    C = (data_zero @ model_zero.T) / data.shape[1]
+    U, S, V_T = np.linalg.svd(C)
+    R_mat = V_T.T @ U.T
+    if np.linalg.det(R_mat) < 0: V_T[2, :] *= -1; R_mat = V_T.T @ U.T
+    var_data = np.mean(np.sum(data_zero ** 2, axis=0))
+    scale = (1.0 / var_data) * np.trace(np.diag(S))
+    t_vec = mu_M - scale * (R_mat @ mu_D)
+    return scale, R_mat, t_vec
 
 
 def main():
-    # --- PATHS ---
-    est_file = "monocular_trajectory.txt"
+    est_file, err_file = "monocular_trajectory.txt", "reprojection_errors.txt"
     gt_file = r"C:\Users\RoboticsLab\PycharmProjects\stereo_vo_project\dataset\dataset-room2_512_16\mav0\mocap0\data.csv"
-    err_file = "reprojection_errors.txt"
+    stats_file = "monocular_stats.txt"
 
-    print("Loading data...")
-    ts_est, xyz_est = load_tum_format(est_file)
+    # Load Data
+    ts_s, xyz_s = load_tum(est_file)
+    data_gt = np.loadtxt(gt_file, delimiter=',', skiprows=1)
+    ts_g, xyz_g = data_gt[:, 0] / 1e9, data_gt[:, 1:4]
 
-    try:
-        data_gt = np.loadtxt(gt_file, delimiter=',', skiprows=1)
-        ts_gt = data_gt[:, 0] / 1e9
-        xyz_gt = data_gt[:, 1:4]
-    except Exception as e:
-        print(f"Error loading GT: {e}")
-        return
+    scale, R, t = align_sim3(*associate(ts_s, xyz_s, ts_g, xyz_g)[::-1])
+    xyz_s_aligned = (scale * R @ xyz_s.T + t).T
+    est_f, gt_f = associate(ts_s, xyz_s_aligned, ts_g, xyz_g)
 
-    print("Aligning the START of the trajectory to Ground Truth...")
-    data_est_matched, data_gt_matched = associate_timestamps_start_only(ts_est, xyz_est, ts_gt, xyz_gt)
+    # Metrics
+    ate_rmse = np.sqrt(np.mean(np.linalg.norm(gt_f - est_f, axis=0) ** 2))
+    mean_runtime, failures = (np.loadtxt(stats_file) if os.path.exists(stats_file) else [0, 0])
 
-    # Calculate Sim3 based ONLY on the start of the sequence
-    scale, R, t = get_sim3(data_gt_matched, data_est_matched)
+    # --- THE "CLEAN" PALETTE ---
+    c_est = '#1F77B4'  # Vibrant Blue (Visible & Bright)
+    c_gt = '#000000'  # Pure Black
+    c_mean = '#FF7F0E'  # Bright Orange
+    c_start = '#27AE60'  # Green
+    c_end = '#E74C3C'  # Red
 
-    # Apply the alignment to the ENTIRE estimated trajectory
-    aligned_full_est = (scale * R @ xyz_est.T + t).T
-
-    # Calculate ATE (Only for the first 200 frames inside the room)
-    aligned_matched_est = (scale * R @ data_est_matched + t).T
-    errors = np.linalg.norm(data_gt_matched.T - aligned_matched_est, axis=1)
-    rmse_ate = np.sqrt(np.mean(errors ** 2))
-
-    if os.path.exists(err_file):
-        rep_err_data = np.loadtxt(err_file)
-        frames = np.arange(len(rep_err_data))
-        rep_errors = rep_err_data[:, 1]
-    else:
-        frames, rep_errors = [], []
-
-    print("\nGenerating and saving individual high-resolution graphs...")
-
-    # --- 1. INDIVIDUAL GRAPH: Unscaled Monocular ---
+    # 1. INDIVIDUAL: 3D TRAJECTORY
     fig1 = plt.figure(figsize=(10, 8))
-    plt.plot(xyz_est[:, 0], xyz_est[:, 1], 'b-', linewidth=2, label='Monocular Path')
-    plt.title("1. Unscaled Monocular Trajectory\n(Shows massive scale drift accumulation)", fontsize=14,
-              fontweight='bold')
-    plt.xlabel("X (arbitrary units)", fontsize=12)
-    plt.ylabel("Y (arbitrary units)", fontsize=12)
-    plt.grid(True)
-    plt.axis('equal')
-    plt.legend(fontsize=12)
-    plt.savefig("graph1_unscaled_monocular.png", dpi=300, bbox_inches='tight')
-    plt.close(fig1)
+    ax1 = fig1.add_subplot(111, projection='3d')
+    ax1.plot(xyz_g[:, 0], xyz_g[:, 1], xyz_g[:, 2], color=c_gt, linestyle='--', linewidth=0.8, alpha=0.6,
+             label='Ground Truth (TUM)')
+    ax1.plot(xyz_s_aligned[:, 0], xyz_s_aligned[:, 1], xyz_s_aligned[:, 2], color=c_est, linewidth=1.0,
+             label='Estimated VO Path')
+    ax1.scatter(xyz_g[0, 0], xyz_g[0, 1], xyz_g[0, 2], color=c_start, s=40, label='Start Point', zorder=10)
+    ax1.scatter(xyz_g[-1, 0], xyz_g[-1, 1], xyz_g[-1, 2], color=c_end, marker='X', s=40, label='End Point', zorder=10)
+    ax1.set_title("3D Trajectory Reconstruction", fontsize=12, fontweight='bold')
+    ax1.set_xlabel("X (m)");
+    ax1.set_ylabel("Y (m)");
+    ax1.set_zlabel("Z (m)")
+    ax1.legend(loc='lower center', bbox_to_anchor=(0.5, -0.1), ncol=4, frameon=False, fontsize=9)
+    plt.savefig("1_Trajectory_3D.png", dpi=300, bbox_inches='tight')
 
-    # --- 2. INDIVIDUAL GRAPH: Ground Truth ---
-    fig2 = plt.figure(figsize=(10, 8))
-    plt.plot(xyz_gt[:, 0], xyz_gt[:, 1], color='black', linestyle='--', linewidth=3, label='Ground Truth')
-    plt.scatter(xyz_gt[0, 0], xyz_gt[0, 1], c='green', s=150, zorder=5, label='Start Point')
-    plt.scatter(xyz_gt[-1, 0], xyz_gt[-1, 1], c='red', marker='X', s=150, zorder=5, label='End Point')
-    plt.title("2. TUM VI Ground Truth\n(Available only inside the 3x3m MoCap room)", fontsize=14, fontweight='bold')
-    plt.xlabel("X (meters)", fontsize=12)
-    plt.ylabel("Y (meters)", fontsize=12)
-    plt.axis('equal')
-    plt.grid(True)
-    plt.legend(fontsize=12)
-    plt.savefig("graph2_ground_truth.png", dpi=300, bbox_inches='tight')
-    plt.close(fig2)
+    # 2. INDIVIDUAL: REPROJECTION ERROR
+    fig2 = plt.figure(figsize=(10, 5))
+    if os.path.exists(err_file):
+        err_data = np.loadtxt(err_file)[:, 1]
+        valid = err_data > 0
+        plt.scatter(range(len(err_data[valid])), err_data[valid], s=5, alpha=0.4, color=c_est,
+                    label='Per-Frame Residuals')
+        m_err = np.mean(err_data[valid])
+        plt.axhline(y=m_err, color=c_mean, linewidth=2.0, label=f'Mean Stability: {m_err:.3f} px')
+        plt.ylim(0, 1.2);
+        plt.title("Visual Tracking Consistency", fontsize=12, fontweight='bold')
+        plt.xlabel("Frame Sequence");
+        plt.ylabel("Error (pixels)")
+        plt.legend(loc='lower center', bbox_to_anchor=(0.5, -0.25), ncol=2, frameon=False, fontsize=9)
+    plt.savefig("2_Reprojection_Error.png", dpi=300, bbox_inches='tight')
 
-    # --- 3. INDIVIDUAL GRAPH: Reprojection Errors ---
-    fig3 = plt.figure(figsize=(12, 6))
-    if len(rep_errors) > 0:
-        plt.scatter(frames, rep_errors, s=15, alpha=0.6, c='blue')
-        plt.axhline(y=2.0, color='red', linestyle='--', linewidth=3, label='2.0 px limit')
-        plt.title(f"3. Reprojection Error per Frame\nMean: {np.mean(rep_errors):.2f} px (Excellent)", fontsize=14,
-                  fontweight='bold')
-        plt.xlabel("Frame Number", fontsize=12)
-        plt.ylabel("Error (pixels)", fontsize=12)
-        plt.ylim(0, max(3.0, min(10, np.max(rep_errors))))
-        plt.grid(True)
-        plt.legend(fontsize=12)
-    plt.savefig("graph3_reprojection_error.png", dpi=300, bbox_inches='tight')
-    plt.close(fig3)
+    # 3. INDIVIDUAL: METRICS TABLE
+    fig3, ax3 = plt.subplots(figsize=(6, 4))
+    ax3.axis('off')
+    table_data = [
+        ["Metric Category", "Computed Value"],
+        ["ATE RMSE (Global)", f"{ate_rmse:.4f} m"],
+        ["Mean Runtime", f"{mean_runtime:.2f} ms"],
+        ["Tracking Failures", f"{int(failures)}"],
+        ["Sim3 Scale Factor", f"{scale:.6f}"]
+    ]
+    tbl = ax3.table(cellText=table_data, loc='center', cellLoc='center', colWidths=[0.5, 0.4])
+    tbl.auto_set_font_size(False);
+    tbl.set_fontsize(11);
+    tbl.scale(1.0, 2.5)
+    plt.savefig("3_Metrics_Table.png", dpi=300, bbox_inches='tight')
 
-    # --- 4. INDIVIDUAL GRAPH: Merged Map ---
-    fig4 = plt.figure(figsize=(12, 10))
-    plt.plot(aligned_full_est[:, 0], aligned_full_est[:, 1], color='dodgerblue', linewidth=2,
-             label='Estimated (Full Walk)')
-    plt.plot(xyz_gt[:, 0], xyz_gt[:, 1], color='black', linestyle='--', linewidth=3, zorder=4,
-             label='Ground Truth (Room)')
-    plt.scatter(xyz_gt[0, 0], xyz_gt[0, 1], c='green', s=200, zorder=5, label='Start Point')
-    plt.title(f"4. Merged Map: Estimated vs Ground Truth\nInitial ATE: {rmse_ate:.3f}m (Before Drift)", fontsize=14,
-              fontweight='bold')
-    plt.xlabel("X (meters)", fontsize=12)
-    plt.ylabel("Y (meters)", fontsize=12)
-    plt.axis('equal')
-    plt.grid(True)
-    plt.legend(fontsize=12, loc='upper right')
-    plt.savefig("graph4_merged_full.png", dpi=300, bbox_inches='tight')
-    plt.close(fig4)
+    # 4. MASTER DASHBOARD
+    fig_dash = plt.figure(figsize=(20, 10), facecolor='white')
 
-    # ---------------------------------------------------------
-    # MASTER DASHBOARD (For PyCharm SciView)
-    # ---------------------------------------------------------
-    print("Generating master dashboard for display...")
-    fig_dash = plt.figure(figsize=(18, 14))
+    # Left: 3D
+    ax_d1 = fig_dash.add_subplot(121, projection='3d')
+    ax_d1.plot(xyz_g[:, 0], xyz_g[:, 1], xyz_g[:, 2], color=c_gt, linestyle='--', linewidth=0.7, alpha=0.5,
+               label='GT (Black)')
+    ax_d1.plot(xyz_s_aligned[:, 0], xyz_s_aligned[:, 1], xyz_s_aligned[:, 2], color=c_est, linewidth=0.9,
+               label='VO Path (Blue)')
+    ax_d1.scatter(xyz_g[0, 0], xyz_g[0, 1], xyz_g[0, 2], color=c_start, s=35, label='Start')
+    ax_d1.scatter(xyz_g[-1, 0], xyz_g[-1, 1], xyz_g[-1, 2], color=c_end, marker='X', s=35, label='End')
+    ax_d1.set_title("Trajectory Evaluation", fontsize=13, fontweight='bold')
+    ax_d1.legend(loc='lower center', bbox_to_anchor=(0.5, -0.1), ncol=4, frameon=False, fontsize=8)
 
-    # Subplot 1
-    ax1 = fig_dash.add_subplot(221)
-    ax1.plot(xyz_est[:, 0], xyz_est[:, 1], 'b-', linewidth=2, label='Monocular Path')
-    ax1.set_title("1. Unscaled Monocular Trajectory\n(The massive scale drift accumulation)", fontsize=14,
-                  fontweight='bold')
-    ax1.set_xlabel("X (arbitrary units)", fontsize=12)
-    ax1.set_ylabel("Y (arbitrary units)", fontsize=12)
-    ax1.grid(True)
-    ax1.axis('equal')
-    ax1.legend(fontsize=12)
+    # Right: Error
+    ax_d2 = fig_dash.add_subplot(122)
+    ax_d2.scatter(range(len(err_data[valid])), err_data[valid], s=4, alpha=0.35, color=c_est, label='Frame Residuals')
+    ax_d2.axhline(y=m_err, color=c_mean, linewidth=2.0, label=f'Mean: {m_err:.3f} px')
+    ax_d2.set_ylim(0, 1.0);
+    ax_d2.set_title("Reprojection Stability", fontsize=13, fontweight='bold')
+    ax_d2.set_xlabel("Time (Frame Sequence)");
+    ax_d2.set_ylabel("Residual (px)")
+    ax_d2.legend(loc='lower center', bbox_to_anchor=(0.5, -0.2), frameon=False, fontsize=8)
 
-    # Subplot 2
-    ax2 = fig_dash.add_subplot(222)
-    ax2.plot(xyz_gt[:, 0], xyz_gt[:, 1], color='black', linestyle='--', linewidth=3, label='Ground Truth')
-    ax2.scatter(xyz_gt[0, 0], xyz_gt[0, 1], c='green', s=150, zorder=5, label='Start Point')
-    ax2.scatter(xyz_gt[-1, 0], xyz_gt[-1, 1], c='red', marker='X', s=150, zorder=5, label='End Point')
-    ax2.set_title("2. TUM VI Ground Truth", fontsize=14, fontweight='bold')
-    ax2.set_xlabel("X (meters)", fontsize=12)
-    ax2.set_ylabel("Y (meters)", fontsize=12)
-    ax2.axis('equal')
-    ax2.grid(True)
-    ax2.legend(fontsize=12)
-
-    # Subplot 3
-    ax3 = fig_dash.add_subplot(223)
-    if len(rep_errors) > 0:
-        ax3.scatter(frames, rep_errors, s=15, alpha=0.6, c='blue')
-        ax3.axhline(y=2.0, color='red', linestyle='--', linewidth=3, label='2.0 px limit')
-        ax3.set_title(f"3. Reprojection Error per Frame\nMean: {np.mean(rep_errors):.2f} px (Excellent)", fontsize=14,
-                      fontweight='bold')
-        ax3.set_xlabel("Frame Number", fontsize=12)
-        ax3.set_ylabel("Error (pixels)", fontsize=12)
-        ax3.set_ylim(0, max(3.0, min(10, np.max(rep_errors))))
-        ax3.grid(True)
-        ax3.legend(fontsize=12)
-
-    # Subplot 4
-    ax4 = fig_dash.add_subplot(224)
-    ax4.plot(aligned_full_est[:, 0], aligned_full_est[:, 1], color='dodgerblue', linewidth=2,
-             label='Estimated (Full Walk)')
-    ax4.plot(xyz_gt[:, 0], xyz_gt[:, 1], color='black', linestyle='--', linewidth=3, zorder=4,
-             label='Ground Truth (Room)')
-    ax4.scatter(xyz_gt[0, 0], xyz_gt[0, 1], c='green', s=200, zorder=5, label='Start Point')
-    ax4.set_title(f"4. Merged Map: Estimated vs Ground Truth\nInitial ATE: {rmse_ate:.3f}m (Before Drift)", fontsize=14,
-                  fontweight='bold')
-    ax4.set_xlabel("X (meters)", fontsize=12)
-    ax4.set_ylabel("Y (meters)", fontsize=12)
-    ax4.axis('equal')
-    ax4.grid(True)
-    ax4.legend(fontsize=12, loc='upper right')
-
-    plt.tight_layout(pad=3.0)
-    plt.savefig("final_trajectory_dashboard.png", dpi=300, bbox_inches='tight')
-
-    print("Success! 5 files saved (4 individual, 1 dashboard). Opening display...")
+    plt.tight_layout(pad=6.0)
+    plt.savefig("MASTER_DASHBOARD.png", dpi=300, bbox_inches='tight')
     plt.show()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__": main()
