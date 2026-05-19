@@ -1,21 +1,25 @@
-# Sparse Optical Flow Framework for Monocular and Metric Stereo Visual Odometry
+# Monocular vs. Stereo Visual Odometry Evaluation
 
-This repository implements a classical, geometry-based sparse visual odometry (VO) pipeline evaluated on the TUM-VI dataset. The system features a robust Monocular VO backbone that is dynamically extended into a Metric Stereo VO framework via a **Strict Keyframe Interlock** mechanism. By processing the right stereo stream only at selected keyframes, the system effectively eliminates scale drift while preserving high runtime efficiency on low-power computational edge hardware.
+This repository contains the source code, evaluation metrics, and trajectory analysis tools for a comparative study between Classical Monocular and Strict Keyframe-Interlock Stereo Visual Odometry pipelines, specifically evaluated against high-rotation, sparse-texture environments.
 
-## 🚀 Key Features
+## Repository Architecture
 
-* **Purely Geometric & Lightweight:** Operates entirely on classical computer vision techniques without deep learning dependencies.
-* **Robust Feature Management:** Utilizes grid bucketing with Shi-Tomasi corner extraction capped at 650 points to eliminate sorting micro-stalls and ensure even spatial coverage.
-* **Active Masking:** Employs a 12-pixel radius mask around active map points to force feature re-seeding in unexplored image regions, preventing map starvation.
-* **Temporal Tracking Validation:** Implements pyramidal Forward-Backward Lucas-Kanade (LK) optical flow with sub-pixel refinement and border containment filtering.
-* **Optimized Pose Estimation:** Computes initial pose via EPnP + RANSAC, followed by non-linear motion refinement minimizing a robust Huber-loss reprojection error.
-* **Strict Keyframe Interlock:** Tracks purely monocularly during standard frames and drops scale drift by activating the right camera stream exclusively at keyframes to estimate direct metric depth.
-* **Map Hygiene Filters:** Rejects unstable far-field triangulations using adaptive disparity floors and custom depth-bounding windows.
+The codebase is structured into three primary directories corresponding to the evaluation datasets. Each directory is entirely self-contained and houses the complete execution pipeline (Monocular VO, Stereo VO, and their respective trajectory evaluation scripts). The core logic remains consistent, but the entry points are isolated to cleanly manage the specific ground truth alignments and results for each unique dataset.
+
+## Dataset Configuration
+
+Due to size limitations (approximately 15GB combined), the raw image sequences and sensor data are not included in this repository. To execute the pipelines, you must download the datasets and place them in the correct relative locations.
+
+**1. Download the Dataset**
+Download the required sequence (e.g., `dataset-outdoors5_512_16` or `dataset-room2_512_16`) from the official TUM VI dataset provider.
+
+**2. Place in the Root Directory**
+Create a root-level directory named `dataset/` and extract your downloaded sequences into it. Ensure the extracted folders match the naming conventions expected by the scripts.
 
 ## 🛠️ Pipeline Architecture
 
 ### 1. Monocular VO Backbone (Stage 1)
-The baseline pipeline extracts undistorted pinhole features and establishes robust frame-to-frame temporal correspondences.
+The baseline pipeline extracts undistorted pinhole features and establishes  frame-to-frame temporal correspondences.
 
 ![Monocular Pipeline](assets/Monocular_pipeline.png)
 
@@ -40,11 +44,7 @@ The project is built using a clean, standard Python configuration optimized for 
 
 ## 💻 Hardware Verification Environment
 
-To demonstrate computational efficiency under strict constraints, the pipeline's runtime benchmarks were recorded entirely on low-power consumer edge hardware without GPU acceleration:
-
-* **Processor:** Intel Core i5-10210U CPU (1.60GHz base, ultra-low voltage mobile architecture)
-* **Memory:** 8 GB RAM
-* **Acceleration:** 100% CPU-bound (Execution of pyramidal LK flow and iterative optimization loops runs entirely without GPU threading)
+------To be added later----
 
 ## 📊 Dataset Evaluation Summary
 
@@ -61,9 +61,6 @@ The pipeline was validated against three distinct sequences from the **TUM Visua
 
 The proposed framework was evaluated across three distinct environments from the TUM-VI benchmark, exposing the behavioral trade-offs between a baseline monocular system and the mono-extended stereo pipeline.
 
-* [cite_start]**Room 2 (Indoor, Feature-Dense):** The baseline Monocular VO pipeline struggled with significant tracking instability, registering 154 tracking failures, a high mean reprojection error of 1.148 pixels, and an Absolute Trajectory Error (ATE) of 0.8195 m[cite: 114]. [cite_start]Upgrading to the Mono-Extended Stereo architecture completely eradicated this tracking instability (0 failures), dropped the mean reprojection error to 0.630 pixels, and reduced the ATE by roughly 56% to 0.3615 m[cite: 117, 118, 119]. [cite_start]Relative Pose Error (RPE) similarly saw a 76% drop down to 0.0230 m/frame[cite: 117]. [cite_start]This vast improvement in spatial consistency incurred only a minor computational tax, dropping tracking frequencies slightly from 11.10 Hz to 9.63 Hz[cite: 115, 120].
-* [cite_start]**Corridor 3 (Low-Texture Hallway):** Characterized by repeating wall patterns and restricted texture, the monocular system failed heavily, dropping tracking 451 times[cite: 123]. [cite_start]The stereo architecture successfully stabilized the pipeline, minimizing failures to just 5 and reducing the reprojection error to a highly precise 0.619 pixels[cite: 123, 124]. [cite_start]Due to the active left-right feature matching and validation at keyframes, the average runtime decreased from 12.09 Hz to 7.64 Hz[cite: 125, 132]. [cite_start]Interestingly, terminal drift slightly increased from 0.5566 m to 0.6293 m[cite: 126]. [cite_start]This behavior highlights a classic geometric constraint of narrow hallway scenes where features reside far down the corridor; the resulting low-disparity measurements degrade depth accuracy, allowing small forward-motion tracking discrepancies to accumulate over time[cite: 127, 139, 140].
-* [cite_start]**Outdoor 5 (Large-Scale Environment):** The monocular baseline's deceptively low terminal drift of 0.4431 m was an artifact of its 1,411 tracking failures, where constant reinitializations prevented long trajectory tracking and artificially masked global drift accumulation[cite: 142, 143, 144]. [cite_start]The stereo pipeline achieved highly stable, continuous tracking (only 5 failures) and maintained a low reprojection error of 0.801 pixels, but accumulated a large terminal drift of 28.5646 m[cite: 145, 147]. [cite_start]This outcome directly exposes the physical boundaries of stereo triangulation [cite: 147][cite_start]: in expansive outdoor environments, far-field features yield sub-pixel disparities[cite: 148, 155]. [cite_start]Consequently, minute temporal matching errors generate massive depth estimation scaling errors that are continuously injected into the active map, compounding tracking drift over long sequences[cite: 149, 150].
 
 ## 🎬 Execution Videos
 
