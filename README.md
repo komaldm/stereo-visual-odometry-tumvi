@@ -23,7 +23,7 @@ Create a root-level directory named `dataset/` and extract your downloaded seque
 The baseline pipeline extracts undistorted pinhole features and establishes frame-to-frame temporal correspondences.
 
 <p align="center">
-  <img src="asset/Monocular_pipeline.png" width="500" height="400">
+  <img src="asset/Monocular_pipeline.png" width="350" height="600">
 </p>
 
 ---
@@ -37,8 +37,83 @@ $$Z = \frac{fb}{d}$$
 A localized, non-linear optimization step immediately stabilizes the updated metric structure with low computational overhead.
 
 <p align="center">
-  <img src="asset/Stereo_Pipeline.png" width="850">
+  <img src="asset/Stereo_Pipeline.png" width="350" height="600">
 </p>
+
+## 🔬 Methodology
+
+The proposed framework evaluates two visual odometry paradigms: a baseline Monocular VO pipeline and a Mono-Extended Stereo VO pipeline with metric-scale correction.
+
+### Monocular VO Pipeline
+
+The monocular backbone performs sparse feature tracking using the Pyramidal Lucas–Kanade (KLT) optical flow framework. Shi–Tomasi corners are extracted and refined to sub-pixel accuracy before temporal tracking.
+
+To improve tracking reliability:
+
+* Forward–backward optical flow verification removes inconsistent correspondences.
+* Border filtering rejects unstable edge features.
+* EPnP + RANSAC pose estimation computes the relative camera transformation.
+* Triangulated landmarks are validated using reprojection error and positive depth constraints.
+
+Keyframes are inserted dynamically using parallax magnitude and feature depletion thresholds. A 4×4 grid bucketing strategy maintains uniform spatial feature distribution across the image plane.
+
+---
+
+### Mono-Extended Stereo VO Pipeline
+
+The stereo framework inherits the full monocular tracking backbone while introducing stereo disparity-based metric depth recovery during keyframe generation.
+
+For every selected keyframe:
+
+* Left-right stereo correspondences are computed using KLT tracking.
+* Horizontal disparity is converted into metric depth using the stereo pinhole model:
+
+$$
+Z = \frac{fb}{d}
+$$
+
+where:
+
+* \(f\) = focal length  
+* \(b\) = stereo baseline  
+* \(d\) = disparity
+
+Recovered 3D landmarks overwrite the scale-ambiguous monocular map, eliminating scale drift accumulation.
+
+A lightweight local optimization stage using `scipy.optimize.least_squares()` further refines the pose by minimizing reprojection residuals under robust Huber-loss constraints.
+
+## 📊 Results and Discussion
+
+The proposed pipelines were evaluated on three challenging sequences from the TUM-VI benchmark containing rapid motion, low-texture regions, indoor-to-outdoor transitions, and long-range depth variation.
+
+The monocular pipeline demonstrated stable short-term tracking performance and efficient runtime behavior. However, long-term trajectory consistency degraded under repetitive textures and distant scene structures due to unavoidable scale drift accumulation.
+
+The mono-extended stereo framework significantly improved global trajectory stability by injecting absolute metric depth during keyframe updates. Stereo depth recovery reduced tracking failures, minimized reinitialization events, and improved reprojection consistency across all evaluated environments.
+
+The largest performance gain was observed in the Outdoor5 sequence, where monocular scale ambiguity caused severe long-range drift. Stereo depth correction substantially stabilized the estimated trajectory despite sub-pixel disparity limitations at large distances.
+
+Although the stereo pipeline introduced additional computational overhead from disparity estimation and local optimization, real-time performance was maintained across all datasets.
+
+## 📈 Quantitative Evaluation
+
+| Metric | Mono VO (Room2) | Stereo VO (Room2) |
+| :--- | :---: | :---: |
+| Absolute Trajectory Error (ATE) | 0.8696 m | 0.2697 m |
+| Relative Pose Error (RPE) | 0.0789 m/frame | 0.0181 m/frame |
+| Start-to-End Drift | 0.5130 m | 0.4342 m |
+| Drift Percentage | 0.36% | 0.31% |
+| Tracking Failures | 169 | 0 |
+| Tracking Success Rate | 94.14% | 100% |
+| Mean Reprojection Error | 1.203 px | 0.650 px |
+| Runtime | 41.25 Hz | 32.97 Hz |
+
+## 🖼️ Trajectory Comparison
+
+| Dataset | Monocular VO | Stereo VO |
+| :--- | :---: | :---: |
+| **Room2** | <img src="asset/room2_mono.png" width="350"> | <img src="asset/room2_stereo.png" width="350"> |
+| **Corridor3** | <img src="asset/corridor3_mono.png" width="350"> | <img src="asset/corridor3_stereo.png" width="350"> |
+| **Outdoor5** | <img src="asset/outdoor5_mono.png" width="350"> | <img src="asset/outdoor5_stereo.png" width="350"> |
 
 ## 📦 Dependencies & Packages
 
@@ -74,11 +149,11 @@ The proposed framework was evaluated across three distinct environments from the
 
 Below are the screen recordings showing the real-time tracking performance, feature bucketing, and trajectory maps across the indoor and outdoor datasets.
 
-### Room 2 MONO VO Sequence
-<video src="assest/Videos/Mono_video.mp4" width="100%" controls></video>
+### Room2 Stereo VO Sequence
+<video src="assest/Videos/room2.mp4" width="100%" controls></video>
 
-### ROOM 2 STEREO VO Sequence
-<video src="assestsVideos/VO_Stereo_Room2.mp4" width="100%" controls></video>
+### Outdoors5 STEREO VO Sequence
+<video src="assestsVideos/outdoors5.mp4" width="100%" controls></video>
 
 ### Outdoor 5 Sequence
 <video src="Videos/Outdoor5_execution.mp4" width="100%" controls></video>
