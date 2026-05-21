@@ -19,18 +19,26 @@ Create a root-level directory named `dataset/` and extract your downloaded seque
 ## 🛠️ Pipeline Architecture
 
 ### 1. Monocular VO Backbone (Stage 1)
-The baseline pipeline extracts undistorted pinhole features and establishes  frame-to-frame temporal correspondences.
 
-![Monocular Pipeline](asset/Monocular_pipeline.png)
+The baseline pipeline extracts undistorted pinhole features and establishes frame-to-frame temporal correspondences.
+
+<p align="center">
+  <img src="asset/Monocular_pipeline.png" width="500" height="400">
+</p>
+
+---
 
 ### 2. Mono-Extended Stereo & Metric Correction (Stages 2 & 3)
+
 When a keyframe is triggered by parallax thresholds, the right stereo frame is read to calculate horizontal disparity and inject absolute metric scale into the global map.
 
 $$Z = \frac{fb}{d}$$
 
 A localized, non-linear optimization step immediately stabilizes the updated metric structure with low computational overhead.
 
-![Stereo Pipeline](asset/Stereo_Pipeline.png)
+<p align="center">
+  <img src="asset/Stereo_Pipeline.png" width="850">
+</p>
 
 ## 📦 Dependencies & Packages
 
