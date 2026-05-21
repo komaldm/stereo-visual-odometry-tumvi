@@ -4,7 +4,33 @@ This repository contains the source code, evaluation metrics, and trajectory ana
 
 ## Repository Architecture
 
-The codebase is structured into three primary directories corresponding to the evaluation datasets. Each directory is entirely self-contained and houses the complete execution pipeline (Monocular VO, Stereo VO, and their respective trajectory evaluation scripts). The core logic remains consistent, but the entry points are isolated to cleanly manage the specific ground truth alignments and results for each unique dataset.
+## 📁 Repository Structure
+
+This repository contains two main folders:
+
+* **Pipeline-I**
+* **Pipeline-II**
+
+### Pipeline-I (KLT Tracking)
+
+Contains two sub-folders:
+
+#### 1. `code/`
+Includes separate folders for:
+
+* `room2/`
+* `corridor3/`
+* `outdoors5/`
+
+Each folder contains the execution scripts and evaluation code for the corresponding dataset.
+
+#### 2. `results/`
+Contains separate result folders for each dataset and pipeline configuration (Mono VO and Stereo VO).
+
+Each result folder contains:
+
+* Trajectory and evaluation `.png` figures
+* **Log** files containing runtime statistics, trajectory metrics, and tracking information
 
 ## Dataset Configuration
 
@@ -40,7 +66,6 @@ The baseline pipeline extracts undistorted pinhole features and establishes fram
   <img src="asset/Monocular_pipeline.png" width="350" height="600">
 </p>
 
----
 The monocular backbone performs sparse feature tracking using the Pyramidal Lucas–Kanade (KLT) optical flow framework. Shi–Tomasi corners are extracted and refined to sub-pixel accuracy before temporal tracking.
 
 To improve tracking reliability:
@@ -51,6 +76,8 @@ To improve tracking reliability:
 * Triangulated landmarks are validated using reprojection error and positive depth constraints.
 
 Keyframes are inserted dynamically using parallax magnitude and feature depletion thresholds. A 4×4 grid bucketing strategy maintains uniform spatial feature distribution across the image plane.
+
+------
 
 ### 2. Mono-Extended Stereo & Metric Correction (Stages 2 & 3)
 
@@ -77,6 +104,8 @@ Recovered 3D landmarks overwrite the scale-ambiguous monocular map, eliminating 
 
 A lightweight local optimization stage using `scipy.optimize.least_squares()` further refines the pose by minimizing reprojection residuals under robust Huber-loss constraints.
 
+------
+
 ## 📊 Results and Discussion
 
 * The pipelines were evaluated on Room2, Corridor3, and Outdoor5 sequences from the TUM-VI benchmark.
@@ -91,27 +120,57 @@ A lightweight local optimization stage using `scipy.optimize.least_squares()` fu
 
 * Despite additional disparity computation, the stereo pipeline maintained real-time performance.
 
+ 
+
 ## 📈 Quantitative Evaluation
 
-| Metric | Mono VO (Room2) | Stereo VO (Room2) |
-| :--- | :---: | :---: |
-| Absolute Trajectory Error (ATE) | 0.8696 m | 0.2697 m |
-| Relative Pose Error (RPE) | 0.0789 m/frame | 0.0181 m/frame |
-| Start-to-End Drift | 0.5130 m | 0.4342 m |
-| Drift Percentage | 0.36% | 0.31% |
-| Tracking Failures | 169 | 0 |
-| Tracking Success Rate | 94.14% | 100% |
-| Mean Reprojection Error | 1.203 px | 0.650 px |
-| Runtime | 41.25 Hz | 32.97 Hz |
+<table>
+  
+  <tr>
+    <td>
+ Pipeline-I Mono VO evaluation metrices on all datasets.
+
+| Evaluation Metric | Room2 | Corridor3 | Outdoor5 |
+|------------------|-------|------------|-----------|
+| Absolute Trajectory Error (ATE) | 0.8696 m | N/A | N/A |
+| Relative Pose Error (RPE) | 0.0789 m/frame | N/A | N/A |
+| Start-to-End Drift (e_drift) | 0.5130 m | 0.5791 m | 0.50 m |
+| Drift Percentage | 0.36 % | 1.42 % | 0.39 % |
+| Tracking Failures (Recoveries) | 169 | 452 | 157 |
+| Tracking Success Rate | 94.14 % | N/A | N/A |
+| Mean Reprojection Error | 1.203 px | 2.059 px | 1.290 px |
+| Mean Per-Frame Runtime | 41.25 Hz | 32.65 Hz | 25.79 Hz |
+</td>
+  <td>
+Pipeline-I Stereo VO evaluation metrices on all datasets.
+
+
+  | Evaluation Metric | Room2 | Corridor3 | Outdoors5 |
+| :--- | :--- | :--- | :--- |
+| Absolute Trajectory Error (ATE) | 0.2697m | N/A | N/A|
+| Relative Pose Error (RPE) | 0.0181m | N/A |N/A |
+| Start-to-End Drift (e_drift) | 0.4342 | 0.6617m | 30.099m |
+| Drift Percentage | 0.31 | 1.63 | 23.52 |
+| Tracking Failures | 0 | 0 | 1 |
+| Tracking Success Rate | 100% | 100% | 99 |
+| Mean Reprojection Error | 0.650 | 0.519 | 0.742 |
+| Mean Per-Frame Runtime | 32.97 hz | 28. hz | 27.66 hz |
+  </td>
+  </tr>
+</table>
 
 ## 🖼️ Trajectory Comparison
 
 | Dataset | Monocular VO | Stereo VO |
 | :--- | :---: | :---: |
-| **Room2** | <img src="asset/room2_mono.png" width="350"> | <img src="asset/room2_stereo.png" width="350"> |
-| **Corridor3** | <img src="asset/corridor3_mono.png" width="350"> | <img src="asset/corridor3_stereo.png" width="350"> |
-| **Outdoor5** | <img src="asset/outdoor5_mono.png" width="350"> | <img src="asset/outdoor5_stereo.png" width="350"> |
+| **Room2** | <img src="asset/r_mono.png" width="700"> | <img src="asset/r_stereo.png" width="700"> |
+| **Corridor3** | <img src="asset/C_mono.png" width="700"> | <img src="asset/c_stereo.png" width="700"> |
+| **Outdoor5** | <img src="asset/O_mono.png" width="700"> | <img src="asset/o_stereo.png" width="700"> |
 
+<p align="center">
+  <img src="asset/anim_r.gif" width="800" height="600">
+</p>
+------
 
 ## ⚖️ Strengths and Limitations
 
@@ -132,6 +191,8 @@ A lightweight local optimization stage using `scipy.optimize.least_squares()` fu
 | Precision | Robust but lower local precision | High sub-pixel tracking accuracy |
 | Computation Cost | Higher descriptor matching overhead | Lightweight but requires re-seeding |
 | Main Weakness | Computationally expensive | Sensitive to sudden motion loss |
+
+------
 
 ## 📊 Dataset Evaluation Summary
 
