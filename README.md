@@ -16,8 +16,22 @@ Download the required sequence (e.g., `dataset-outdoors5_512_16` or `dataset-roo
 **2. Place in the Root Directory**
 Create a root-level directory named `dataset/` and extract your downloaded sequences into it. Ensure the extracted folders match the naming conventions expected by the scripts.
 
-## 🛠️ Pipeline Architecture
+## 📦 Dependencies & Packages
 
+The project is built using a clean, standard Python configuration optimized for fast numerical execution on edge devices:
+
+* **Python 3.x**
+* **OpenCV (`opencv-python`):** Used for lens distortion mapping, Shi-Tomasi corner extraction, LK optical flow tracking, and initial EPnP RANSAC pose estimation.
+* **SciPy (`scipy.optimize`):** Utilizes `least_squares` with robust loss configurations to handle non-linear pose refinement, local bundle adjustment, and Huber-loss optimization loops.
+* **NumPy:** Handles underlying matrix operations, frame transformations, vector operations, and coordinate projections.
+* **Matplotlib:** (Optional) For real-time 2D/3D trajectory plotting and error evaluation tracking.
+
+## 💻 Hardware Verification Environment
+
+------To be added later----
+
+## 🛠️ Pipeline Architecture
+The proposed framework evaluates two visual odometry paradigms: a baseline Monocular VO pipeline and a Mono-Extended Stereo VO pipeline with metric-scale correction.
 ### 1. Monocular VO Backbone (Stage 1)
 
 The baseline pipeline extracts undistorted pinhole features and establishes frame-to-frame temporal correspondences.
@@ -27,25 +41,6 @@ The baseline pipeline extracts undistorted pinhole features and establishes fram
 </p>
 
 ---
-
-### 2. Mono-Extended Stereo & Metric Correction (Stages 2 & 3)
-
-When a keyframe is triggered by parallax thresholds, the right stereo frame is read to calculate horizontal disparity and inject absolute metric scale into the global map.
-
-$$Z = \frac{fb}{d}$$
-
-A localized, non-linear optimization step immediately stabilizes the updated metric structure with low computational overhead.
-
-<p align="center">
-  <img src="asset/Stereo_Pipeline.png" width="350" height="600">
-</p>
-
-## 🔬 Methodology
-
-The proposed framework evaluates two visual odometry paradigms: a baseline Monocular VO pipeline and a Mono-Extended Stereo VO pipeline with metric-scale correction.
-
-### Monocular VO Pipeline
-
 The monocular backbone performs sparse feature tracking using the Pyramidal Lucas–Kanade (KLT) optical flow framework. Shi–Tomasi corners are extracted and refined to sub-pixel accuracy before temporal tracking.
 
 To improve tracking reliability:
@@ -57,12 +52,12 @@ To improve tracking reliability:
 
 Keyframes are inserted dynamically using parallax magnitude and feature depletion thresholds. A 4×4 grid bucketing strategy maintains uniform spatial feature distribution across the image plane.
 
----
+### 2. Mono-Extended Stereo & Metric Correction (Stages 2 & 3)
 
-### Mono-Extended Stereo VO Pipeline
-
-The stereo framework inherits the full monocular tracking backbone while introducing stereo disparity-based metric depth recovery during keyframe generation.
-
+<p align="center">
+  <img src="asset/Stereo_Pipeline.png" width="350" height="600">
+</p>
+When a keyframe is triggered by parallax thresholds, the right stereo frame is read to calculate horizontal disparity and inject absolute metric scale into the global map.
 For every selected keyframe:
 
 * Left-right stereo correspondences are computed using KLT tracking.
@@ -84,15 +79,17 @@ A lightweight local optimization stage using `scipy.optimize.least_squares()` fu
 
 ## 📊 Results and Discussion
 
-The proposed pipelines were evaluated on three challenging sequences from the TUM-VI benchmark containing rapid motion, low-texture regions, indoor-to-outdoor transitions, and long-range depth variation.
+* The pipelines were evaluated on Room2, Corridor3, and Outdoor5 sequences from the TUM-VI benchmark.
 
-The monocular pipeline demonstrated stable short-term tracking performance and efficient runtime behavior. However, long-term trajectory consistency degraded under repetitive textures and distant scene structures due to unavoidable scale drift accumulation.
+* Monocular VO achieved efficient real-time tracking but accumulated noticeable scale drift in long-range and low-texture environments.
 
-The mono-extended stereo framework significantly improved global trajectory stability by injecting absolute metric depth during keyframe updates. Stereo depth recovery reduced tracking failures, minimized reinitialization events, and improved reprojection consistency across all evaluated environments.
+* The stereo framework improved trajectory stability by injecting metric depth during keyframe updates.
 
-The largest performance gain was observed in the Outdoor5 sequence, where monocular scale ambiguity caused severe long-range drift. Stereo depth correction substantially stabilized the estimated trajectory despite sub-pixel disparity limitations at large distances.
+* Stereo VO significantly reduced tracking failures, reprojection error, and long-term drift across all datasets.
 
-Although the stereo pipeline introduced additional computational overhead from disparity estimation and local optimization, real-time performance was maintained across all datasets.
+* The largest improvement was observed in Outdoor5, where stereo depth correction stabilized large-scale trajectory estimation.
+
+* Despite additional disparity computation, the stereo pipeline maintained real-time performance.
 
 ## 📈 Quantitative Evaluation
 
@@ -115,19 +112,26 @@ Although the stereo pipeline introduced additional computational overhead from d
 | **Corridor3** | <img src="asset/corridor3_mono.png" width="350"> | <img src="asset/corridor3_stereo.png" width="350"> |
 | **Outdoor5** | <img src="asset/outdoor5_mono.png" width="350"> | <img src="asset/outdoor5_stereo.png" width="350"> |
 
-## 📦 Dependencies & Packages
 
-The project is built using a clean, standard Python configuration optimized for fast numerical execution on edge devices:
+## ⚖️ Strengths and Limitations
 
-* **Python 3.x**
-* **OpenCV (`opencv-python`):** Used for lens distortion mapping, Shi-Tomasi corner extraction, LK optical flow tracking, and initial EPnP RANSAC pose estimation.
-* **SciPy (`scipy.optimize`):** Utilizes `least_squares` with robust loss configurations to handle non-linear pose refinement, local bundle adjustment, and Huber-loss optimization loops.
-* **NumPy:** Handles underlying matrix operations, frame transformations, vector operations, and coordinate projections.
-* **Matplotlib:** (Optional) For real-time 2D/3D trajectory plotting and error evaluation tracking.
+| Pipeline | Strengths | Limitations |
+| :--- | :--- | :--- |
+| **Monocular VO** | • Low computational cost and fast runtime  <br> • Requires only a single camera  <br> • Can estimate depth using temporal triangulation | • No absolute metric scale  <br> • Accumulates scale drift over time  <br> • Tracking failure in low-texture scenes  <br> • Essential matrix becomes unstable during pure rotation |
+| **Stereo VO** | • Direct metric depth from stereo disparity  <br> • Reduced trajectory drift  <br> • Improved tracking robustness  <br> • Better long-term trajectory stability | • Higher computational overhead  <br> • Limited reliable depth range  <br> • Noisy disparity near occlusions/boundaries  <br> • Still affected by long-term drift |
 
-## 💻 Hardware Verification Environment
+## 🔄 Pipeline Architecture Comparison (ORB vs. KLT)
 
-------To be added later----
+| Aspect | ORB Pipeline | KLT Pipeline |
+| :--- | :--- | :--- |
+| Feature Extraction | FAST corners + BRIEF descriptors | Shi–Tomasi corners + sub-pixel refinement |
+| Tracking Method | Descriptor matching using Hamming distance | Pyramidal Lucas–Kanade optical flow |
+| Filtering Strategy | Lowe ratio test + cross-checking | Forward–backward error validation |
+| Motion Handling | Better for sudden/large motion | Better for smooth continuous motion |
+| Relocalization | Supports descriptor-based relocalization | Relies on temporal continuity |
+| Precision | Robust but lower local precision | High sub-pixel tracking accuracy |
+| Computation Cost | Higher descriptor matching overhead | Lightweight but requires re-seeding |
+| Main Weakness | Computationally expensive | Sensitive to sudden motion loss |
 
 ## 📊 Dataset Evaluation Summary
 
@@ -140,9 +144,7 @@ The pipeline was validated against three distinct sequences from the **TUM Visua
 | **Outdoor 5** | Large-Scale Mixed | Far-field sub-pixel disparity | Eradicated reinitialization loops; highlights long-range degradation. |
 
 > **Note:** For specific hyperparameter setups per sequence (such as adaptive KLT window sizes, Huber loss scaling thresholds, and custom depth ceilings), refer to the configuration matrices inside the project documentation.
-> ## 📊 Results and Discussion
 
-The proposed framework was evaluated across three distinct environments from the TUM-VI benchmark, exposing the behavioral trade-offs between a baseline monocular system and the mono-extended stereo pipeline.
 
 
 ## 🎬 Execution Videos
