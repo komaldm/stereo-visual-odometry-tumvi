@@ -1,4 +1,4 @@
-# Monocular vs. Stereo Visual Odometry Evaluation
+# Monocular vs. Stereo Visual Odometry Evaluatio
 
 This repository contains the source code, evaluation metrics, and trajectory analysis tools for a comparative study between Classical Monocular and Strict Keyframe-Interlock Stereo Visual Odometry pipelines, specifically evaluated against high-rotation, sparse-texture environments.
 
