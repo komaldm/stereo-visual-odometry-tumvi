@@ -30,7 +30,7 @@ $$Z = \frac{fb}{d}$$
 
 A localized, non-linear optimization step immediately stabilizes the updated metric structure with low computational overhead.
 
-![Stereo Pipeline](asset/Stereo_pipeline.png)
+![Stereo Pipeline](asset/Stereo_Pipeline.png)
 
 ## 📦 Dependencies & Packages
 
