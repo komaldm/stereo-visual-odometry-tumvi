@@ -168,7 +168,19 @@ Pipeline-I Stereo VO evaluation metrices on all datasets.
 | **Outdoor5** | <img src="asset/O_mono.png" width="700"> | <img src="asset/o_stereo.png" width="700"> |
 
 <p align="center">
-  <img src="asset/anim_r.gif" width="800" height="600">
+  <img src="asset/anim_r.gif" width="100%" height="900">
+</p>
+------
+Below are the screen recordings showing the real-time tracking performance, feature bucketing, and trajectory maps across the indoor and outdoor datasets.
+
+### Room2 Stereo VO Sequence
+<p align="center">
+  <img src="asset/stereo_r.gif" width="100%" height="100%">
+</p>
+
+### Outdoors5 STEREO VO Sequence
+<p align="center">
+  <img src="asset/stereo_o.gif" width="100%" height="100%">
 </p>
 ------
 
@@ -208,15 +220,3 @@ The pipeline was validated against three distinct sequences from the **TUM Visua
 
 
 
-## 🎬 Execution Videos
-
-Below are the screen recordings showing the real-time tracking performance, feature bucketing, and trajectory maps across the indoor and outdoor datasets.
-
-### Room2 Stereo VO Sequence
-<video src="assest/Videos/room2.mp4" width="100%" controls></video>
-
-### Outdoors5 STEREO VO Sequence
-<video src="assestsVideos/outdoors5.mp4" width="100%" controls></video>
-
-### Outdoor 5 Sequence
-<video src="Videos/Outdoor5_execution.mp4" width="100%" controls></video>
