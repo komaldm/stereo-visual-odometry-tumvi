@@ -99,6 +99,21 @@ The project is built using a clean, standard Python configuration optimized for 
 * **NumPy:** Handles underlying matrix operations, frame transformations, vector operations, and coordinate projections.
 * **Matplotlib:** (Optional) For real-time 2D/3D trajectory plotting and error evaluation tracking.
 
+## System Used for Running Experiments
+
+All experiments were executed on a desktop system with the following hardware configuration:
+
+| Component | Specification |
+|----------|---------------|
+| CPU | AMD Ryzen 5 5600X 6-Core Processor |
+| CPU Cores / Threads | 6 cores / 12 threads |
+| Architecture | x86_64 |
+| GPU | NVIDIA GeForce RTX 3060 |
+| GPU Memory | 12 GB |
+| NVIDIA Driver | 580.142 |
+| CUDA Version | 13.0 |
+
+This system was used to run Pipeline-I and Pipeline-II on all datasets, including `room2`, `corridor3`, and `outdoors5`.
 
 ## 🛠️ Pipeline Architecture
 ## Pipeline-I: KLT Tracking
