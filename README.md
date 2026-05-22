@@ -309,9 +309,9 @@ Pipeline-II Stereo VO evaluation metrices on all datasets.
 ### Pipeline-I: KLT Tracking
 | Dataset | Monocular VO | Stereo VO |
 | :--- | :---: | :---: |
-| **Room2** | <img src="asset/r_mono.png" width="700"> | <img src="asset/r_stereo.png" width="700"> |
-| **Corridor3** | <img src="asset/C_mono.png" width="700"> | <img src="asset/c_stereo.png" width="700"> |
-| **Outdoor5** | <img src="asset/O_mono.png" width="700"> | <img src="asset/o_stereo.png" width="700"> |
+| **Room2** | <img src="asset/r_mono.png" width="700"> | <img src="asset/s_room2.png" width="700"> |
+| **Corridor3** | <img src="asset/C_mono.png" width="700"> | <img src="asset/s_corridor.png" width="700"> |
+| **Outdoor5** | <img src="asset/O_mono.png" width="700"> | <img src="asset/s_outdoor.png" width="700"> |
 
 ### Pipeline-II: ORB-Based Visual Odometry
 
