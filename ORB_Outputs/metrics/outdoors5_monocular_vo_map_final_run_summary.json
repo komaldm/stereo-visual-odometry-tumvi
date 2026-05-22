@@ -1,0 +1,17 @@
+{
+  "frames_processed": 17728,
+  "final_frame_idx": 17746,
+  "accepted_pose_count": 1196,
+  "tracking_lost_events": 5,
+  "relocalization_attempts": 17011,
+  "relocalization_successes": 2,
+  "cv_fallback_count": 131,
+  "first_tracking_lost_frame": 520,
+  "longest_tracked_streak": 502,
+  "final_map_point_count": 812,
+  "final_keyframe_count": 131,
+  "runtime_seconds": 3440.990043748,
+  "avg_ms_per_frame": 194.09916763018953,
+  "runtime_fps_frames_processed": 5.152005607284549,
+  "runtime_fps_accepted_poses": 0.3475743855094946
+}

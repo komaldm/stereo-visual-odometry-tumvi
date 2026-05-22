@@ -1,0 +1,71 @@
+{
+  "trajectory_path": "/home/ureed/komal/outputs/trajectories/outdoors5_monocular_vo_map_final.txt",
+  "summary_path": "/home/ureed/komal/outputs/metrics/outdoors5_monocular_vo_map_final_run_summary.json",
+  "alignment": {
+    "scale": 0.009766357026591387,
+    "R": [
+      [
+        0.5536136629289656,
+        0.2599901814716306,
+        -0.7911491754130333
+      ],
+      [
+        -0.770976074786861,
+        -0.19912421199139277,
+        -0.6049342446126289
+      ],
+      [
+        -0.3148139201570016,
+        0.9448569488219664,
+        0.09020832521572292
+      ]
+    ],
+    "t": [
+      0.22184952092504207,
+      0.07358042041368056,
+      1.2163715518324252
+    ]
+  },
+  "coverage": {
+    "num_est_total": 1198,
+    "num_gt_total": 16480,
+    "num_associated": 1167,
+    "association_ratio_vs_est": 0.9741235392320534,
+    "association_ratio_vs_gt": 0.0708131067961165
+  },
+  "ate": {
+    "rmse": 0.7056210539164199,
+    "mean": 0.6187881213045421,
+    "median": 0.5461296558987482,
+    "std": 0.3391199384620646,
+    "min": 0.03943309826595734,
+    "max": 2.271505063600252
+  },
+  "rpe_translation": {
+    "delta_frames": 10,
+    "rmse": 0.4575116736196285,
+    "mean": 0.4094279149575687,
+    "median": 0.4197619867756256,
+    "std": 0.20417079603050825,
+    "min": 0.007180909791244042,
+    "max": 0.9399150939771966
+  },
+  "end_point_drift": 2.271505063600252,
+  "run_summary": {
+    "frames_processed": 17728,
+    "final_frame_idx": 17746,
+    "accepted_pose_count": 1196,
+    "tracking_lost_events": 5,
+    "relocalization_attempts": 17011,
+    "relocalization_successes": 2,
+    "cv_fallback_count": 131,
+    "first_tracking_lost_frame": 520,
+    "longest_tracked_streak": 502,
+    "final_map_point_count": 812,
+    "final_keyframe_count": 131,
+    "runtime_seconds": 3440.990043748,
+    "avg_ms_per_frame": 194.09916763018953,
+    "runtime_fps_frames_processed": 5.152005607284549,
+    "runtime_fps_accepted_poses": 0.3475743855094946
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "trajectory_path": "/home/ureed/komal/outputs/trajectories/room2_monocular_vo_map_final.txt",
+  "summary_path": "/home/ureed/komal/outputs/metrics/room2_monocular_vo_map_final_run_summary.json",
+  "alignment": {
+    "scale": 0.17010230528541812,
+    "R": [
+      [
+        -0.09147437224140299,
+        0.08866426176464984,
+        -0.9918523518693544
+      ],
+      [
+        0.9247633074980804,
+        -0.3619033103703488,
+        -0.11763851005599021
+      ],
+      [
+        -0.36938498118934326,
+        -0.9279895703232404,
+        -0.04888857783814023
+      ]
+    ],
+    "t": [
+      0.09955244802318017,
+      -0.10177371932878831,
+      1.1877739236674871
+    ]
+  },
+  "coverage": {
+    "num_est_total": 2613,
+    "num_gt_total": 15477,
+    "num_associated": 2338,
+    "association_ratio_vs_est": 0.8947569843092231,
+    "association_ratio_vs_gt": 0.15106286748077793
+  },
+  "ate": {
+    "rmse": 1.2545404436477803,
+    "mean": 1.215652838262866,
+    "median": 1.2715821873715998,
+    "std": 0.30993531836724847,
+    "min": 0.05374458847278112,
+    "max": 1.80945713814019
+  },
+  "rpe_translation": {
+    "delta_frames": 10,
+    "rmse": 0.6047908365867002,
+    "mean": 0.5421152747381839,
+    "median": 0.5300584727018551,
+    "std": 0.26811002389836935,
+    "min": 0.005732912858939473,
+    "max": 2.2374393096921383
+  },
+  "end_point_drift": 0.902387634699304,
+  "run_summary": {
+    "frames_processed": 2840,
+    "final_frame_idx": 2881,
+    "accepted_pose_count": 2611,
+    "tracking_lost_events": 3,
+    "relocalization_attempts": 2396,
+    "relocalization_successes": 2,
+    "cv_fallback_count": 94,
+    "first_tracking_lost_frame": 407,
+    "longest_tracked_streak": 2151,
+    "final_map_point_count": 1070,
+    "final_keyframe_count": 75,
+    "runtime_seconds": 312.6851230889997,
+    "avg_ms_per_frame": 110.10039545387313,
+    "runtime_fps_frames_processed": 9.082619511743287,
+    "runtime_fps_accepted_poses": 8.350253360972436
+  }
+}

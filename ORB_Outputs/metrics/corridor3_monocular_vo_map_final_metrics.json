@@ -1,0 +1,71 @@
+{
+  "trajectory_path": "/home/ureed/komal/outputs/trajectories/corridor3_monocular_vo_map_final.txt",
+  "summary_path": "/home/ureed/komal/outputs/metrics/corridor3_monocular_vo_map_final_run_summary.json",
+  "alignment": {
+    "scale": 0.15354695169255134,
+    "R": [
+      [
+        -0.9951409629861928,
+        -0.09073631223782189,
+        0.03822807120944021
+      ],
+      [
+        -0.040939337632369566,
+        0.02820938926218566,
+        -0.9987633358267
+      ],
+      [
+        0.08954571134977035,
+        -0.995475339724162,
+        -0.031787003317844564
+      ]
+    ],
+    "t": [
+      0.48783999318330795,
+      -0.8212300697593007,
+      1.3653937154921703
+    ]
+  },
+  "coverage": {
+    "num_est_total": 1968,
+    "num_gt_total": 7186,
+    "num_associated": 377,
+    "association_ratio_vs_est": 0.1915650406504065,
+    "association_ratio_vs_gt": 0.0524631227386585
+  },
+  "ate": {
+    "rmse": 0.5011695858401977,
+    "mean": 0.41637662224801025,
+    "median": 0.34642061047716644,
+    "std": 0.27892913475750974,
+    "min": 0.055506720254553464,
+    "max": 1.514477357222215
+  },
+  "rpe_translation": {
+    "delta_frames": 10,
+    "rmse": 0.32248693661149014,
+    "mean": 0.27952192629410627,
+    "median": 0.2642467329348685,
+    "std": 0.16082697847654634,
+    "min": 0.016085675395445236,
+    "max": 0.9273875007769612
+  },
+  "end_point_drift": 1.514477357222215,
+  "run_summary": {
+    "frames_processed": 5662,
+    "final_frame_idx": 5801,
+    "accepted_pose_count": 1966,
+    "tracking_lost_events": 1,
+    "relocalization_attempts": 5280,
+    "relocalization_successes": 0,
+    "cv_fallback_count": 80,
+    "first_tracking_lost_frame": 521,
+    "longest_tracked_streak": 1584,
+    "final_map_point_count": 1262,
+    "final_keyframe_count": 92,
+    "runtime_seconds": 574.7422519080001,
+    "avg_ms_per_frame": 101.50869867679268,
+    "runtime_fps_frames_processed": 9.85137247384124,
+    "runtime_fps_accepted_poses": 3.420663773149396
+  }
+}

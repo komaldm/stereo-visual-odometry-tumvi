@@ -1,0 +1,2 @@
+tag,trajectory_path,num_est_total,num_associated,association_ratio_vs_est,association_ratio_vs_gt,rigid_ate_rmse_m,rigid_rpe_translation_rmse_m,rigid_end_point_drift_m,sim3_scale,sim3_scale_error_abs,sim3_ate_rmse_m,sim3_rpe_translation_rmse_m,sim3_end_point_drift_m
+corridor3_stereo_vo_final,/home/ureed/komal/outputs/trajectories/corridor3_stereo_vo_final.txt,5802,1200,0.20682523267838676,0.16699137211244086,5.3875406794784855,0.9876999998724633,4.477043530363217,0.0686963665450499,0.93130363345495,0.787384603807129,0.36330676268923967,0.1984290175467984

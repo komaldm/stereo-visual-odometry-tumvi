@@ -1,0 +1,17 @@
+{
+  "start_idx": 0,
+  "end_idx_exclusive": 2882,
+  "frames_attempted": 2882,
+  "frames_succeeded": 2882,
+  "tracking_failures": 0,
+  "loose_retry_count": 4,
+  "cv_fallback_count": 0,
+  "saved_pose_count": 2882,
+  "runtime_seconds": 185.22760673699997,
+  "avg_ms_per_frame": 64.27050893025675,
+  "runtime_fps_attempted": 15.559235746602715,
+  "runtime_fps_succeeded": 15.559235746602715,
+  "rectified_baseline_m": 0.10108726432764312,
+  "max_depth_m": 12.0,
+  "min_depth_m": 0.4
+}
