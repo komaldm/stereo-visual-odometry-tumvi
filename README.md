@@ -325,9 +325,10 @@ Pipeline-II Stereo VO evaluation metrices on all datasets.
 <p align="center">
   <img src="asset/anim_r.gif" width="100%" height="900">
 </p>
+
 ------
 Below are the screen recordings showing the real-time tracking performance, feature bucketing, and trajectory maps across the indoor and outdoor datasets.
-
+### Pipeline-I: KLT Tracking
 ### Room2 Stereo VO Sequence
 <p align="center">
   <img src="asset/stereo_r.gif" width="100%" height="100%">
@@ -339,7 +340,18 @@ Below are the screen recordings showing the real-time tracking performance, feat
 </p>
 ------
 
+### Pipeline-II: ORB-Based Visual Odometry
 
+### Room2 Stereo VO Sequence
+<p align="center">
+  <img src="asset/stereo_r.gif" width="100%" height="100%">
+</p>
+
+### Outdoors5 STEREO VO Sequence
+<p align="center">
+  <img src="asset/stereo_o.gif" width="100%" height="100%">
+</p>
+------
 
 
 ## ⚖️ Strengths and Limitations
