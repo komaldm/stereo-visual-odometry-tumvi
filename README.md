@@ -313,6 +313,15 @@ Pipeline-II Stereo VO evaluation metrices on all datasets.
 | **Corridor3** | <img src="asset/C_mono.png" width="700"> | <img src="asset/c_stereo.png" width="700"> |
 | **Outdoor5** | <img src="asset/O_mono.png" width="700"> | <img src="asset/o_stereo.png" width="700"> |
 
+### Pipeline-II: ORB-Based Visual Odometry
+
+| Dataset | Monocular VO | Stereo VO |
+| :--- | :---: | :---: |
+| **Room2** | <img src="asset/2_mono_room2.png" width="700"> | <img src="asset/r_stereo.png" width="700"> |
+| **Corridor3** | <img src="asset/2_mono_corridor.png" width="700"> | <img src="asset/c_stereo.png" width="700"> |
+| **Outdoor5** | <img src="asset/2_mono_outdoor.png" width="700"> | <img src="asset/o_stereo.png" width="700"> |
+
+
 <p align="center">
   <img src="asset/anim_r.gif" width="100%" height="900">
 </p>
@@ -330,13 +339,6 @@ Below are the screen recordings showing the real-time tracking performance, feat
 </p>
 ------
 
-### Pipeline-II: ORB-Based Visual Odometry
-
-| Dataset | Monocular VO | Stereo VO |
-| :--- | :---: | :---: |
-| **Room2** | <img src="asset/2_mono_room2.png" width="700"> | <img src="asset/r_stereo.png" width="700"> |
-| **Corridor3** | <img src="asset/2_mono_corridor.png" width="700"> | <img src="asset/c_stereo.png" width="700"> |
-| **Outdoor5** | <img src="asset/2_mono_outdoor.png" width="700"> | <img src="asset/o_stereo.png" width="700"> |
 
 
 
