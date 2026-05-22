@@ -30,6 +30,22 @@ Each result folder contains:
 * Trajectory and evaluation `.png` figures
 * **Log** files containing runtime statistics, trajectory metrics, and tracking information
 
+
+A shorter version for your README could be:
+
+
+### Pipeline-II: ORB-Based Visual Odometry
+
+Pipeline-II implements visual odometry using ORB features for both monocular and stereo configurations.
+
+```text
+Pipeline II_ORB/
+├── ORB_Outputs/      # Generated outputs and logs
+├── results_png/      # Saved trajectory images and evaluation figures
+├── scripts/          # Execution, evaluation, and testing scripts
+└── src/              # Core modular implementation
+
+
 ## Dataset Configuration
 
 Due to size limitations (approximately 15GB combined), the raw image sequences and sensor data are not included in this repository. To execute the pipelines, you must download the datasets and place them in the correct relative locations.
