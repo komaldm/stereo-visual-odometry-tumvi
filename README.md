@@ -38,7 +38,6 @@ A shorter version for your README could be:
 
 Pipeline-II implements visual odometry using ORB features for both monocular and stereo configurations.
 
-```text
 Pipeline II_ORB/
 ├── ORB_Outputs/      # Generated outputs and logs
 ├── results_png/      # Saved trajectory images and evaluation figures
