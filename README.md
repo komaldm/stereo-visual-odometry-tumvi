@@ -111,7 +111,7 @@ A lightweight local optimization stage using `scipy.optimize.least_squares()` fu
 
 ------
 
-## **Pipeline-II: ORB-Based Visual Odometry **
+## Pipeline-II: ORB-Based Visual Odometry 
 ### 1. Monocular VO Backbone
 
 The monocular pipeline estimates camera motion using only the left camera image stream. Since only one camera is used, the trajectory is scale-ambiguous and requires Sim(3) alignment during evaluation.
@@ -120,7 +120,7 @@ The monocular pipeline estimates camera motion using only the left camera image 
   <img src="asset/orb_mono_flowchart.png" width="350" height="600">
 </p>
 
-he monocular system first undistorts the fisheye image using the TUM VI calibration file. ORB features are then detected and matched between frames using Hamming-distance descriptor matching.
+The monocular system first undistorts the fisheye image using the TUM VI calibration file. ORB features are then detected and matched between frames using Hamming-distance descriptor matching.
 
 Initialization is performed from a carefully selected image pair:
 
@@ -199,9 +199,9 @@ Because metric depth is available from the stereo baseline, the stereo trajector
 
 ---
 
-## **Monocular to Stereo Connection**
+## **Monocular to Stereo Connection in Pipeline II**
 
-The stereo pipeline builds directly on the monocular VO structure. Both pipelines use ORB features, descriptor matching, RANSAC pose estimation, pose refinement, validation checks, visualization, and trajectory evaluation.
+The stereo pipeline builds directly on the monocular VO structure. Both mono and stereo use ORB features, descriptor matching, RANSAC pose estimation, pose refinement, validation checks, visualization, and trajectory evaluation.
 
 The main difference is depth source:
 
@@ -209,14 +209,6 @@ The main difference is depth source:
 * Stereo VO creates depth immediately from left-right disparity.
 
 This makes stereo more stable because scale is known from the beginning. The stereo baseline provides metric depth, reducing drift and improving recovery when tracking becomes difficult.
-
-
-
-
-
-
-
-
 
 
 
@@ -234,9 +226,6 @@ This makes stereo more stable because scale is known from the beginning. The ste
 * The largest improvement was observed in Outdoor5, where stereo depth correction stabilized large-scale trajectory estimation.
 
 * Despite additional disparity computation, the stereo pipeline maintained real-time performance.
-
-
-
 
 
 
@@ -276,6 +265,44 @@ Pipeline-I Stereo VO evaluation metrices on all datasets.
   </td>
   </tr>
 </table>
+
+
+
+<table width="100%">
+  
+  <tr>
+    <td>
+ Pipeline-II Mono VO evaluation metrices on all datasets.
+
+| Evaluation Metric | Room2 | Corridor3 | Outdoor5 |
+|------------------|-------|------------|-----------|
+| Absolute Trajectory Error (ATE) | 1.255 m | N/A | N/A |
+| Relative Pose Error (RPE) | 0.605 m/frame | N/A | N/A |
+| Start-to-End Drift (e_drift) | 0.902 m | 1.515 m | 2.272 m |
+| Tracking Failures (Recoveries) | 3 | 1 | 5 |
+| Mean Reprojection Error | 1.170 px | 1.178 px | 1.171 px |
+| Mean Per-Frame Runtime | 9.98 Hz | 10.63 Hz | 5.59 Hz |
+</td>
+  <td>
+
+    
+Pipeline-II Stereo VO evaluation metrices on all datasets.
+
+
+  | Evaluation Metric | Room2 | Corridor3 | Outdoors5 |
+| :--- | :--- | :--- | :--- |
+| Absolute Trajectory Error (ATE) | 0.579 m | N/A | N/A|
+| Relative Pose Error (RPE) | 0.232 m | N/A |N/A |
+| Start-to-End Drift (e_drift) | 4.477 | 0.6617m | 48.67m |
+| Tracking Failures | 0 | 0 | 2 |
+| Tracking Success Rate | 100% | 100% | 95 |
+| Mean Reprojection Error | 0.875 | 1.001 | 0.829 |
+| Mean Per-Frame Runtime | 16.30 hz | 14.57 hz | 9.79 hz |
+  </td>
+  </tr>
+</table>
+
+
 
 ## 🖼️ Trajectory Comparison
 
