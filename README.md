@@ -58,11 +58,9 @@ The project is built using a clean, standard Python configuration optimized for 
 * **NumPy:** Handles underlying matrix operations, frame transformations, vector operations, and coordinate projections.
 * **Matplotlib:** (Optional) For real-time 2D/3D trajectory plotting and error evaluation tracking.
 
-## 💻 Hardware Verification Environment
-
-------To be added later----
 
 ## 🛠️ Pipeline Architecture
+## Pipeline-I: KLT Tracking
 The proposed framework evaluates two visual odometry paradigms: a baseline Monocular VO pipeline and a Mono-Extended Stereo VO pipeline with metric-scale correction.
 ### 1. Monocular VO Backbone (Stage 1)
 
@@ -90,6 +88,7 @@ Keyframes are inserted dynamically using parallax magnitude and feature depletio
 <p align="center">
   <img src="asset/Stereo_Pipeline.png" width="350" height="600">
 </p>
+
 When a keyframe is triggered by parallax thresholds, the right stereo frame is read to calculate horizontal disparity and inject absolute metric scale into the global map.
 For every selected keyframe:
 
@@ -112,6 +111,116 @@ A lightweight local optimization stage using `scipy.optimize.least_squares()` fu
 
 ------
 
+## **Pipeline-II: ORB-Based Visual Odometry **
+### 1. Monocular VO Backbone
+
+The monocular pipeline estimates camera motion using only the left camera image stream. Since only one camera is used, the trajectory is scale-ambiguous and requires Sim(3) alignment during evaluation.
+
+<p align="center">
+  <img src="documentation/monocular_flowchart.png" width="420" height="620">
+</p>
+
+he monocular system first undistorts the fisheye image using the TUM VI calibration file. ORB features are then detected and matched between frames using Hamming-distance descriptor matching.
+
+Initialization is performed from a carefully selected image pair:
+
+* ORB features are detected in both frames.
+* Feature matches are filtered using Lowe’s ratio test and mutual checking.
+* The Essential Matrix is estimated using RANSAC.
+* Relative pose is recovered using `recoverPose()`.
+* Initial 3D landmarks are created by triangulation.
+* Landmarks are validated using positive depth, reprojection error, and parallax checks.
+
+After initialization, the system tracks each new frame using 3D–2D pose estimation:
+
+* Existing 3D map points are matched with current ORB features.
+* Camera pose is estimated using `solvePnPRansac()`.
+* The actual PnP type used is `SOLVEPNP_ITERATIVE`.
+* The pose is refined using `solvePnPRefineLM()`.
+* Reprojection error and motion sanity checks validate the pose.
+
+If tracking becomes weak, the system uses recovery mechanisms:
+
+* Local and global relocalization against stored map points.
+* Essential Matrix fallback using recent frame-to-frame geometry.
+* Damped constant-velocity fallback for short tracking gaps.
+* Map rebuild from a strong anchor frame when the local map becomes unreliable.
+
+Keyframes are inserted when motion, rotation, or weak tracking indicates that the map should be refreshed. New landmarks are triangulated from keyframe pairs and added to the local map.
+
+---
+
+
+### 2. Stereo VO Backbone
+
+The stereo pipeline extends the monocular idea by using both left and right TUM VI camera images. Unlike monocular VO, stereo VO can recover metric depth directly from the stereo baseline.
+
+<p align="center">
+  <img src="documentation/stereo_flowchart.png" width="420" height="620">
+</p>
+
+The stereo system first rectifies the left and right fisheye images using the camera calibration and stereo extrinsics. After rectification, horizontal disparity is computed using SGBM.
+
+Metric depth is recovered using the stereo pinhole model:
+
+$$
+Z = \frac{fb}{d}
+$$
+
+where:
+
+* \(f\) = rectified focal length  
+* \(b\) = stereo baseline  
+* \(d\) = horizontal disparity  
+
+The stereo frontend works by combining ORB features with SGBM depth:
+
+* SGBM computes disparity for the rectified stereo pair.
+* ORB detects trackable features in the left image.
+* Only ORB features with valid and stable disparity are kept.
+* Each retained feature receives a metric 3D position.
+
+Temporal tracking is then performed between consecutive stereo frames:
+
+* ORB descriptors are matched from the previous frame to the current frame.
+* Previous-frame 3D points are matched to current-frame 2D keypoints.
+* Pose is estimated using `solvePnPRansac()`.
+* The actual PnP type used is `SOLVEPNP_ITERATIVE`.
+* The pose is refined using `solvePnPRefineLM()`.
+
+To improve robustness, the stereo pipeline includes several fallback stages:
+
+* Dense ORB retry with a lower FAST threshold when too few valid depth features exist.
+* Loose retry with relaxed matching and PnP constraints.
+* 3D–3D RANSAC rigid alignment when PnP fails but both frames have valid depth.
+* Damped constant-velocity fallback for short gaps.
+
+Because metric depth is available from the stereo baseline, the stereo trajectory does not suffer from monocular scale ambiguity. Evaluation therefore uses rigid SE(3) alignment instead of Sim(3) scale correction.
+
+---
+
+## **Monocular to Stereo Connection**
+
+The stereo pipeline builds directly on the monocular VO structure. Both pipelines use ORB features, descriptor matching, RANSAC pose estimation, pose refinement, validation checks, visualization, and trajectory evaluation.
+
+The main difference is depth source:
+
+* Monocular VO creates depth by triangulating motion between frames.
+* Stereo VO creates depth immediately from left-right disparity.
+
+This makes stereo more stable because scale is known from the beginning. The stereo baseline provides metric depth, reducing drift and improving recovery when tracking becomes difficult.
+
+
+
+
+
+
+
+
+
+
+
+
 ## 📊 Results and Discussion
 
 * The pipelines were evaluated on Room2, Corridor3, and Outdoor5 sequences from the TUM-VI benchmark.
@@ -126,7 +235,10 @@ A lightweight local optimization stage using `scipy.optimize.least_squares()` fu
 
 * Despite additional disparity computation, the stereo pipeline maintained real-time performance.
 
- 
+
+
+
+
 
 ## 📈 Quantitative Evaluation
 
