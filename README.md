@@ -317,9 +317,9 @@ Pipeline-II Stereo VO evaluation metrices on all datasets.
 
 | Dataset | Monocular VO | Stereo VO |
 | :--- | :---: | :---: |
-| **Room2** | <img src="asset/2_mono_room2.png" width="700"> | <img src="asset/r_stereo.png" width="700"> |
-| **Corridor3** | <img src="asset/2_mono_corridor.png" width="700"> | <img src="asset/c_stereo.png" width="700"> |
-| **Outdoor5** | <img src="asset/2_mono_outdoor.png" width="700"> | <img src="asset/o_stereo.png" width="700"> |
+| **Room2** | <img src="asset/2_mono_room2.png" width="700"> | <img src="asset/2_stereo_room2.png" width="700"> |
+| **Corridor3** | <img src="asset/2_mono_corridor.png" width="700"> | <img src="asset/2_stereo_corridor.png" width="700"> |
+| **Outdoor5** | <img src="asset/2_mono_outdoor.png" width="700"> | <img src="asset/2_stereo_outdoor.png" width="700"> |
 
 
 <p align="center">
