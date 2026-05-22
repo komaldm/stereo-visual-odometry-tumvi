@@ -38,6 +38,32 @@ Pipeline II_ORB/
 └── src/              # Core modular implementation
 ~~~
 
+## Running Pipeline-II: ORB-Based Visual Odometry
+
+Pipeline-II can be executed in both **Monocular VO** and **Stereo VO** modes.  
+The following commands should be run from the root directory of `Pipeline II_ORB`.
+
+---
+
+### 1. Run Monocular VO
+
+```bash
+python scripts/run_monocular_vo_map.py --dataset room2 --save-video
+
+python scripts/run_monocular_vo_map.py --dataset corridor3 --save-video
+
+python scripts/run_monocular_vo_map.py --dataset outdoors5 --save-video
+```
+#### Generate Monocular VO Results
+```
+python scripts/generate_monocular_results.py --dataset room2 --tag room2_monocular_vo_map_final --traj outputs/trajectories/room2_monocular_vo_map_final.txt
+
+python scripts/generate_monocular_results.py --dataset corridor3 --tag corridor3_monocular_vo_map_final --traj outputs/trajectories/corridor3_monocular_vo_map_final.txt
+
+python scripts/generate_monocular_results.py --dataset outdoors5 --tag outdoors5_monocular_vo_map_final --traj outputs/trajectories/outdoors5_monocular_vo_map_final.txt
+```
+
+
 ## Dataset Configuration
 
 Due to size limitations (approximately 15GB combined), the raw image sequences and sensor data are not included in this repository. To execute the pipelines, you must download the datasets and place them in the correct relative locations.
