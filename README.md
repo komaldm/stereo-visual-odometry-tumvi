@@ -306,6 +306,7 @@ Pipeline-II Stereo VO evaluation metrices on all datasets.
 
 ## 🖼️ Trajectory Comparison
 
+### Pipeline-I: KLT Tracking
 | Dataset | Monocular VO | Stereo VO |
 | :--- | :---: | :---: |
 | **Room2** | <img src="asset/r_mono.png" width="700"> | <img src="asset/r_stereo.png" width="700"> |
@@ -328,6 +329,16 @@ Below are the screen recordings showing the real-time tracking performance, feat
   <img src="asset/stereo_o.gif" width="100%" height="100%">
 </p>
 ------
+
+### Pipeline-II: ORB-Based Visual Odometry
+
+| Dataset | Monocular VO | Stereo VO |
+| :--- | :---: | :---: |
+| **Room2** | <img src="asset/r_mono.png" width="700"> | <img src="asset/r_stereo.png" width="700"> |
+| **Corridor3** | <img src="asset/C_mono.png" width="700"> | <img src="asset/c_stereo.png" width="700"> |
+| **Outdoor5** | <img src="asset/O_mono.png" width="700"> | <img src="asset/o_stereo.png" width="700"> |
+
+
 
 ## ⚖️ Strengths and Limitations
 
