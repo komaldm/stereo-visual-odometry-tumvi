@@ -156,7 +156,7 @@ Keyframes are inserted when motion, rotation, or weak tracking indicates that th
 The stereo pipeline extends the monocular idea by using both left and right TUM VI camera images. Unlike monocular VO, stereo VO can recover metric depth directly from the stereo baseline.
 
 <p align="center">
-  <img src="documentation/orb_stereo_flowchart.png" width="420" height="620">
+  <img src="asset/orb_stereo_flowchart.png" width="350" height="600">
 </p>
 
 The stereo system first rectifies the left and right fisheye images using the camera calibration and stereo extrinsics. After rectification, horizontal disparity is computed using SGBM.
