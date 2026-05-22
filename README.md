@@ -37,6 +37,47 @@ Pipeline II_ORB/
 ├── scripts/          # Execution, evaluation, and testing scripts
 └── src/              # Core modular implementation
 ~~~
+## Running Pipeline-II: ORB-Based Visual Odometry
+
+Pipeline-II can be executed in both **Monocular VO** and **Stereo VO** modes.  
+The following commands should be run from the root directory of `Pipeline II_ORB`.
+
+---
+
+### 1. Run Monocular VO
+
+```
+python scripts/run_monocular_vo_map.py --dataset room2 --save-video
+
+python scripts/run_monocular_vo_map.py --dataset corridor3 --save-video
+
+python scripts/run_monocular_vo_map.py --dataset outdoors5 --save-video
+```
+#### Generate Monocular VO Results
+```
+python scripts/generate_monocular_results.py --dataset room2 --tag room2_monocular_vo_map_final --traj outputs/trajectories/room2_monocular_vo_map_final.txt
+
+python scripts/generate_monocular_results.py --dataset corridor3 --tag corridor3_monocular_vo_map_final --traj outputs/trajectories/corridor3_monocular_vo_map_final.txt
+
+python scripts/generate_monocular_results.py --dataset outdoors5 --tag outdoors5_monocular_vo_map_final --traj outputs/trajectories/outdoors5_monocular_vo_map_final.txt
+```
+
+### 1. Run Stereo VO
+```
+python scripts/run_stereo_vo.py --dataset room2 --tag room2_stereo_vo_final --save-video
+
+python scripts/run_stereo_vo.py --dataset corridor3 --tag corridor3_stereo_vo_final --save-video
+
+python scripts/run_stereo_vo.py --dataset outdoors5 --tag outdoors5_stereo_vo_final --save-video
+```
+#### Generate Stereo VO Results
+```
+python scripts/generate_stereo_results.py --dataset room2 --tag room2_stereo_vo_final --traj outputs/trajectories/room2_stereo_vo_final.txt
+
+python scripts/generate_stereo_results.py --dataset corridor3 --tag corridor3_stereo_vo_final --traj outputs/trajectories/corridor3_stereo_vo_final.txt
+
+python scripts/generate_stereo_results.py --dataset outdoors5 --tag outdoors5_stereo_vo_final --traj outputs/trajectories/outdoors5_stereo_vo_final.txt
+```
 
 ## Dataset Configuration
 
