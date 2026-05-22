@@ -452,4 +452,12 @@ The pipeline was validated against three distinct sequences from the **TUM Visua
 > **Note:** For specific hyperparameter setups per sequence (such as adaptive KLT window sizes, Huber loss scaling thresholds, and custom depth ceilings), refer to the configuration matrices inside the project documentation.
 
 
+## ✅ Conclusion
 
+This project presented a comparative study of two visual odometry pipelines: **Pipeline-I based on KLT tracking** and **Pipeline-II based on ORB features**. Both pipelines were implemented and evaluated in monocular and stereo configurations using the Room2, Corridor3, and Outdoors5 datasets.
+
+The results show that stereo visual odometry provides better scale consistency and trajectory stability than monocular visual odometry because metric depth can be recovered directly from the stereo baseline. Monocular VO remains simpler and faster to set up, but it is more affected by scale ambiguity, drift, and tracking instability in challenging environments.
+
+Overall, **Pipeline-I with KLT tracking achieved the best performance** in terms of accuracy, runtime, and trajectory stability. Its sub-pixel optical-flow tracking and forward–backward validation provided more consistent frame-to-frame correspondences, especially in smooth camera motion sequences. Compared with the ORB-based pipeline, the KLT pipeline produced lower pose error, lower drift, and faster processing speed across most evaluated cases.
+
+Pipeline-II with ORB features was useful for testing descriptor-based matching, relocalization, and map-based recovery, but it introduced higher computational cost and larger trajectory errors in several experiments. Therefore, for the evaluated datasets, the KLT-based Pipeline-I is the more effective solution for real-time visual odometry, while the ORB-based Pipeline-II remains a valuable modular framework for further improvements such as stronger loop closure, better relocalization, and global bundle adjustment.
