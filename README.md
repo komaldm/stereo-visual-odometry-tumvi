@@ -378,6 +378,12 @@ Below are the screen recordings showing the real-time tracking performance, feat
 
 ## 📊 Dataset Evaluation Summary
 
+From the quantitative results, **Pipeline-I using KLT tracking performs better overall than Pipeline-II using ORB features**. In the Room2 dataset, Pipeline-I achieves lower trajectory errors in both monocular and stereo modes. For example, the stereo ATE is reduced from **0.579 m in Pipeline-II** to **0.2697 m in Pipeline-I**, and the stereo RPE decreases from **0.232 m to 0.0181 m**.
+
+Pipeline-I also shows better runtime performance. The monocular version runs at **41.25 Hz on Room2**, compared to **9.98 Hz** for Pipeline-II. Similarly, the stereo version of Pipeline-I is faster across all datasets.
+
+Although Pipeline-II has fewer tracking recoveries in the monocular case, Pipeline-I produces more accurate and stable trajectories with lower drift, lower pose error, and faster processing speed. This shows that the KLT-based approach is more suitable for this dataset because it provides efficient frame-to-frame feature tracking and maintains better temporal consistency between consecutive frames.
+
 The pipeline was validated against three distinct sequences from the **TUM Visual-Inertial (TUM-VI)** benchmark (recorded at 20 Hz in 16-bit HDR):
 
 | Sequence | Environment Type | Primary Challenge | Stereo Impact |
