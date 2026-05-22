@@ -87,7 +87,7 @@ Due to size limitations (approximately 15GB combined), the raw image sequences a
 Download the required sequence (e.g., `dataset-outdoors5_512_16` or `dataset-room2_512_16`) from the official TUM VI dataset provider.
 
 **2. Place in the Root Directory**
-Create a root-level directory named `dataset/` and extract your downloaded sequences into it. Ensure the extracted folders match the naming conventions expected by the scripts.
+Create a root-level directory named `dataset/` and extract your downloaded sequences into it. Ensure the extracted folders match the naming conventions expected by the scripts, for run the pipeline 1. 
 
 ## 📦 Dependencies & Packages
 
