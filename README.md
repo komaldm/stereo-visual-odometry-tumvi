@@ -2,8 +2,6 @@
 
 This repository contains the source code, evaluation metrics, and trajectory analysis tools for a comparative study between Classical Monocular and Strict Keyframe-Interlock Stereo Visual Odometry pipelines, specifically evaluated against high-rotation, sparse-texture environments.
 
-## Repository Architecture
-
 ## 📁 Repository Structure
 
 This repository contains two main folders:
@@ -124,7 +122,7 @@ A lightweight local optimization stage using `scipy.optimize.least_squares()` fu
 
 ## 📈 Quantitative Evaluation
 
-<table>
+<table width="100%">
   
   <tr>
     <td>
